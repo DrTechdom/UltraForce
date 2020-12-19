@@ -40,10 +40,10 @@
   #define RGB_LED        5  // RGB LED
   #define RADIO_CS       49  // Radio hardware
   #define RADIO_CE       48  // Radio hardware
-  #define LED_HEARTBEAT  0 // Heart beat LED
+  #define LED_HEARTBEAT  0 // Heart beat   -- replace with LED LED_BUILTIN if were going to use
    
   // Analog inputs
-  #define BTN_TRIGGER    0  // Trigger/enter button
+  #define BTN_TRIGGER    4  // Trigger/enter button
   #define BTN_UP         0  // Up button
   #define BTN_DOWN       0  // Down button
 #else
@@ -57,7 +57,7 @@
   #define RADIO_CS       8  // Radio hardware
   #define RADIO_CE       9  // Radio hardware
   #define open_10        10 // Open Pin
-  #define LED_HEARTBEAT  13 // Heart beat LED
+  #define LED_HEARTBEAT  13 // Heart beat LED   -- replace with LED LED_BUILTIN if were going to use
    
   // Analog inputs
   #define BTN_TRIGGER    0  // Trigger/enter button
@@ -84,6 +84,7 @@ String msg_combine = "";
 long radioLastPing = 30000;
 unsigned long lastShot = 0;
 long int timer_registation = 2000;
+byte screen = 0;
 
 char Buffdata[10];
 

@@ -40,7 +40,7 @@ void RF_RX() {
 
     //Debugging
     #if defined(DEBUGGER2)
-      Serial.print("<RF:HOST> "); Serial.println(text_str);
+      Serial.print("<RF:HOST (RAW) ("); Serial.print(sizeof(text)); Serial.print(")> "); Serial.println(text_str);
     #endif
     
     #if defined(DEBUGGER)
@@ -64,21 +64,18 @@ void RF_RX() {
 
       //PING - PONG
       else if (text_str.substring(4,8) == "PING" && gameData_status == 0) {
-        SendMSG("PONG","");
+        SendMSG("PONG",text_str.substring(9));
         radioLastPing = millis() + 30000;
 
-        #if defined(DISPLAYTYPE_TWO_CHAR)
-          lcd.setCursor(0, 1);
-          lcd.print("Ready          ");
-        #else
-          //1602
-        #endif
+        //screens(3); /* Show ready screen */
       }
 
       //Game Start
-      else if (text_str.substring(4,8) == "SART" && gameData_status == 0) {
+      else if (text_str.substring(4,8) == "SART") { // && gameData_status == 0
+        Serial.println("Game starting . . .");
         //Start game
         gameData_status = 2;
+        screens(5);
         gameData_reset();
         setTeamColor();
         gameData_wait_time_mills = millis();
@@ -134,32 +131,7 @@ void RF_RX() {
           #if defined(DEBUGGER)
             Serial.println("<CLIENT> Registation Successful");
           #endif
-
-          #if defined(DISPLAYTYPE_TWO_CHAR)
-            lcd.setCursor(0, 1);
-            lcd.print("Ready           ");
-          #else
-            //1603
-            display.clearDisplay();
-            display.setTextSize(1);
-            display.setTextColor(SSD1306_WHITE);
-            display.setCursor(3, 0);
-            display.print("Player ID: "); display.println(gameData_playerID);
-            display.setCursor(6, 25);
-            display.setTextSize(1);
-            display.println("Host Found!");
-            display.display();
-            delay( 1500 );
-            display.clearDisplay();
-            display.setTextSize(1);
-            display.setTextColor(SSD1306_WHITE);
-            display.setCursor(3, 0);
-            display.print("Player ID: "); display.println(gameData_playerID);
-            display.setCursor(6, 25);
-            display.setTextSize(3);
-            display.println("Ready");
-            display.display();
-          #endif
+          screens(2); /* Host Found */
           
           radioLastPing = millis() + 30000;
           gameData_status = 0;
@@ -177,6 +149,18 @@ void RF_RX() {
         SendMSG("CREG","");
         }
      }
+
+     /* Ping Pong Results */
+     if (text_str.substring(4,8) == "PSTA") {
+        #if defined(DEBUGGER)
+          Serial.print("<RF:CLIENT -> CONSOLE> Ping-Pong Results: "); Serial.println(text_str.substring(9));
+        #endif     
+     }
     }
-  }  
+  }
+}
+
+void RF_endgame() {
+  radioLastPing = millis() + 30000;
+  SendMSG("hits","1");
 }

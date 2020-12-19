@@ -42,6 +42,7 @@ void process_IR() {
       #else
         // 1603
       #endif
+    //  screens(7);
 
       // Record the shot
       gameData_shots++;

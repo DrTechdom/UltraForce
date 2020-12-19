@@ -2,59 +2,10 @@
  *                  Ultra Force                   *
  *        Created by. Ryan and Alex Vesely        *  
  *                                                *
- *             Update on  08/21/2019              */
-String         sw_version = "1.3.286"; 
+ *             Update on  12/19/2020              */
+String         sw_version = "1.3.298"; 
  /**************************************************/
 
-
-/******* Setup per gun ************
- *                                *
- *  These are the only settings   *
- *        to set per gun          *
- **********************************/
-int gameData_playerID = 1;
-
-
-/********* RGB LEDs ***************
- *  How many LEDs are on a gun?   *
- **********************************/
-#define NUM_LEDS    1
-
-
-/******* Display type ************
- *  1 - 2 char LCD               *
- *  2 - 603 OLED                 *
- *********************************/
-// #define DISPLAYTYPE_TWO_CHAR
-#define DISPLAYTYPE_1603
-
-
-/********* Audio ****************/
-#define AUTOTYPE_PIZZO
- // #define AUTOTYPE_SOUNDFX
-
-
-/****** SoundFX - Gun Theme *****/
-#define GUNTHEME_OLDSKOOL
-// #define GUNTHEME_FORTNITE
-// #define GUNTHEME_CAT
-// #define GUNTHEME_WOLF
-// #define GUNTHEME_UNICORN
-
-
-/************************************
- *       DEBUG CONFIGURATION        *
- ************************************/
- #define DEBUGGER     // Low level printout debugging
- //#define DEBUGGER2  // Verbose level printout debugging
- //#DEBUGRF           // Radio debugging
-
-
-
-
-
-
-/******** END OF CONFIG ******************/
 
 
 /**** DEPENDENCIES TO INSTALL *****  
@@ -68,6 +19,7 @@ int gameData_playerID = 1;
  *  
  *  FastLED                     - All
  *  RF24                        - All
+ *  timerfreetone               - ALL https://bitbucket.org/teckel12/arduino-timer-free-tone/downloads/
  **********************************/
  
 
@@ -85,29 +37,65 @@ int gameData_playerID = 1;
  ***********************************/
 
 
-
-
-
-
-
-
-//Compatibity errors
-#if !defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
-  #if defined(DISPLAYTYPE_1603)
-    #error Only Arduino mega can not run this display
-    /*******************************
-     * The smaller Arduinos are not compatable with this display
-     * as the size of the processor is too small
-     */
-  #endif
-
-  #if defined(AUTOTYPE_SOUNDFX)
-    #error Only Arduino mega can not run SoundFX
-     /*******************************
-     * The smaller Arduinos are is not compatable with running SoundFX
-     * as the size of the processor is too small
-     */
-  #endif
-#endif
-
-#include "guncode.h"
+/******** Change Log *****************
+ *  
+ *  02/11/2018 - Ryan Vesely - Version 1.1.0
+ *    Start of project - Moved from guncode 1.0
+ *  
+ *  02/13/2018 - Ryan Vesely - Version 1.1.4
+ *    Start of IR RX and TX - Working
+ *    
+ *  02/14/2018 - Ryan Vesely - Version 1.1.8
+ *    Added library to interact with RGB LED
+ *    Kept sample code
+ *    Added debounce for trigger
+ *    
+ *  02/17/2018 - Ryan Vesely - Version 1.1.14
+ *    Added tones
+ *      - Shooting
+ *      - Dead
+ *      - Respawn
+ *
+ *    Added basic team data
+ *    Added shot verification
+ *    Added function to RGB LED
+ *      - Set team color
+ *      - Dead
+ *      
+ *  02/18/2018 - Ryan Vesely - Version 1.1.19
+ *    Added game start timer
+ *    Added in game timer
+ *
+ *    Moved around RGB led code to make timers work
+ *    and to dim/brighten LED for enabled disabled status
+ *
+ *  02/18/2018 - Ryan Vesely - Version 1.1.22
+ *    Added idle mode to run a rainbow effect on the RGB LEDs when not in game
+ *    
+ *  02/25/2018 - Ryan Vesely - Version 1.1.44
+ *    Added the ability for the base to program the gun
+ *    with all nessecary game parameters and then start the game.
+ *    
+ *  --------- Missing Data ----------
+ *  ?/?/2018 - Ryan Vesely - 1.2.0
+ *    Moved from proto board to Arduino nano to add to final products using a two line serial LCD
+ *    
+ *  ?/?/2019 - Ryan Vesely - 1.3.0
+ *    Migrated from Arduino nano to Arduiono Mega using the Adafruit 1306 SSD as the buffer overflows for the 1306
+ *    using a nano. Going to keep the two line LCD as an optional gun.
+ *    
+ *  12/16/2020 - Ryan Vesely - 1.3.290
+ *    Moved all screens to seperate screens() function depending on the type of screen
+ *    
+ *  12/17/2020 - Ryan Vesely - 1.3.294
+ *    Fixed multi client RF issues and collisions
+ *    Added connetion lost screen and function when ping timer succeeds
+ *    
+ *  12/18/2020 - Ryan Vesely - 1.3.298
+ *    Repaired client ping timer
+ *    Added ping statisics of client <-> server and caculations to add to clients signal strength meter
+ *    
+ *  12/18/2020 - Ryan Vesely - 1.3.298
+ *    Migrated git changelog here. Moving from local git to github
+ *    
+ */

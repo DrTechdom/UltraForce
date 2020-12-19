@@ -35,15 +35,7 @@ void timers() {
     FastLED.show();
 
     //Print Player name and stats
-    #if defined(DISPLAYTYPE_TWO_CHAR)
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print(gameData_roster[gameData_playerID][1]);
-      lcd.setCursor(0, 1);
-      lcd.print("Shots left: 000");
-    #else
-      //1603
-    #endif
+    screens(4); /* In game and alive */
   }
  
   // Game start time count down
@@ -57,15 +49,7 @@ void timers() {
       TimerFreeTone(SPEAKER, 50, 100);
     #endif
 
-    #if defined(DISPLAYTYPE_TWO_CHAR)
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Game Starting!");
-      lcd.setCursor(0, 1);
-      lcd.print("Get to hidding!!");
-    #else
-      //1603
-    #endif
+    //screens(5);
     }
   }
 
@@ -93,15 +77,7 @@ void timers() {
     FastLED.show();
 
     //Print Player name and stats
-    #if defined(DISPLAYTYPE_TWO_CHAR)
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print(gameData_roster[gameData_playerID][1]);
-      lcd.setCursor(0, 1);
-      lcd.print("Shots left: 000");
-    #else
-      //1603
-    #endif
+    screens(4);
   }
  
   // In-Game end time
@@ -110,16 +86,7 @@ void timers() {
       Serial.println("<CLIENT> Game has ended");
     #endif
 
-    #if defined(DISPLAYTYPE_TWO_CHAR)
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Game Ended!");
-      lcd.setCursor(0, 1);
-      lcd.print("Get to base!");
-    #else
-      //1603
-    #endif
-    
+    screens(6); /* Game ending screen */
     playerData_alive = 1;
     gameData_status = 0;
     gameData_game_time = 0;
@@ -144,102 +111,24 @@ void timers() {
     FastLED.setBrightness(  BRIGHTNESS_ALIVE );
     FastLED.show();
 
-    #if defined(DISPLAYTYPE_TWO_CHAR)
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      sprintf(Buffdata,"Player %u", gameData_playerID);
-      lcd.print(Buffdata);
-      lcd.setCursor(0, 1);
-      lcd.print("Ready");
-    #else
-      //1603
-    #endif
+    screens(3); /* Idle screen */
     
-    radioLastPing = millis() + 30000;
-    SendMSG("hits","1");
+    RF_endgame();
   }
 
 #if defined(DISPLAYTYPE_TWO_CHAR)
-if (millis() > timer_flipflop && playerData_alive == 1) {
-    timer_flipflop = millis() + 1500; // Every 2 seconds
-    lcd.clear();
-
-    //Top Screen
-    lcd.setCursor(0, 0);
-
-    switch (flipflop) {
-      case 0:
-       if (gameData_status == 0) {
-        sprintf(Buffdata,"Player %u", gameData_playerID);
-        lcd.print(Buffdata);
-       }
-       break;
-      case 1:
-        if (gameData_status == 0) {
-          lcd.print("Ultra Force");
-        }
-        break;
-      case 2:
-       if (gameData_status == 0) {
-        sprintf(Buffdata,"Player %u", gameData_playerID);
-        lcd.print(Buffdata);
-       }
-       break;
-    }
-
-    if (gameData_status == 1) { lcd.print(gameData_roster[gameData_playerID][1]); }
-    if (gameData_status == -1) {   sprintf(Buffdata,"Player %u", gameData_playerID);
-                                   lcd.print(Buffdata); }
-                                
-
-    //Bottom Screen
-    lcd.setCursor(0, 1);
-    
-    switch (flipflop) {
-      case 0:
-        if (gameData_status == 1) { lcd.print("Shots left: 000"); }
-        if (gameData_status == -1) { lcd.print("Connecting.."); }
-        break;
-      case 1:
-       if (gameData_status == -1) { lcd.print("Connecting. ."); }
-       if (gameData_status == 1) { 
-        sprintf(Buffdata,"Hits: %u", gameData_shots);
-        lcd.print(Buffdata);}
-       break;
-      case 2:
-       if (gameData_status == -1) { lcd.print("Connecting .."); }
-       if (gameData_status == 1) {
-        int time, seconds, mins = 0;
-        time = gameData_game_time - (millis() - gameData_wait_time_mills) / 1000;
-        //mins = time / 60;
-        sprintf(Buffdata,"Time: %u:%u", mins, time);
-        lcd.print(Buffdata); }
-       break;
-    }
-
-    if (gameData_status == 0) { lcd.print("Ready"); }
-
-    //Perform flip flop
-    if (flipflop == 2) {
-      flipflop = 0;
-    }else{
-      flipflop++;
-    }
-}
+  screens_flipflop();
 #endif
 
   //Ping Pong Timer
-/*
+
   if (millis() > radioLastPing && gameData_status != -1) {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Ultra Force");
-    lcd.setCursor(0, 1);
-    lcd.scrollDisplayLeft();
-    lcd.print("Lost Connection!");
+    screens(8);
     leds[0] = CRGB::Blue;
     FastLED.show();
+    delay(3000);
     gameData_status = -1;
+    screens(1);
    }
-*/
+
 }

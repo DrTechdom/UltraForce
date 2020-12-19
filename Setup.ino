@@ -1,4 +1,16 @@
 void setup() {
+  #if defined(DEBUGGER) or defined(DEBUGGER2)
+   // Start the serial
+   Serial.begin(115200);
+   while(!Serial);
+   Serial.println("<CLIENT> Guncode Client Starting...");
+  #endif
+    
+  //Setup pins
+  #if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+    pinMode(BTN_TRIGGER,OUTPUT);
+  #endif
+  
   pinMode(LED_SHOOT,OUTPUT);
   digitalWrite(LED_SHOOT,HIGH);
   delay( 1500 ); // power-up safety delay
@@ -9,38 +21,22 @@ void setup() {
   #if defined(DISPLAYTYPE_TWO_CHAR)
     lcd.init();
     lcd.backlight();
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("UltraForce");
-    lcd.setCursor(0, 1);
-    lcd.print("Ver "+sw_version);
   #else
    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
-      Serial.println(F("SSD1306 allocation failed"));
+      #if defined(DEBUGGER)
+        Serial.println(F("SSD1306 allocation failed"));
+      #endif
       for(;;); // Don't proceed, loop forever
     }
+    
     display.display(); // Splash screen
     display.clearDisplay();
     delay(2);
-    display.setTextSize(2);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0, 0);
-    display.println(F("UltraForce"));
-    display.setCursor(3, 25);
-    display.setTextSize(1);
-    display.println("Version: "+sw_version);
-    display.display();
   #endif
+  screens(0); /* Display start screen */
   
   delay(1500);
-
-  #if defined(DEBUGGER) or defined(DEBUGGER2)
-   // Start the serial
-   Serial.begin(9600);
-   while(!Serial);
-   Serial.println("<CLIENT> Guncode Client Starting...");
-  #endif
 
   /*
    * I2C Scanner for debugging
@@ -92,17 +88,23 @@ void setup() {
   #endif
   
   radio.begin();
-  radio.setPALevel(RF24_PA_HIGH);   // RF24_PA_MIN ,RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
-  if (!radio.setDataRate( RF24_2MBPS )) { Serial.println("<CONSOLE> Set data rate failed!"); } // RF24_250KBPS, RF24_1MBPS, RF24_2MBPS
+  radio.setPALevel(RF24_PA_LOW);   // RF24_PA_MIN ,RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
+  if (!radio.setDataRate( RF24_2MBPS )) {  // RF24_250KBPS, RF24_1MBPS, RF24_2MBPS
+    #if defined(DEBUGGER)
+      Serial.println("<CONSOLE> Set data rate failed!");
+    #endif
+  }
+  
   radio.setChannel(22);
-  //radio.setRetries(15, 4);
+  radio.setRetries(3, 5);
   //radio.enableAckPayload();
   radio.setCRCLength(RF24_CRC_8);
   //radio.setPayloadSize(20);
-  radio.setAutoAck(0);
+  //radio.setAutoAck(0);
 
   // Get into standby mode
   radio.startListening();
+  delay(20);
   radio.stopListening();
 
   #if defined(DEBUGRF)
@@ -113,7 +115,6 @@ void setup() {
   radio.openReadingPipe(1, pipeNum[0]);
   radio.openWritingPipe(pipeNum[gameData_playerID]);
   radio.startListening();
-  //radio.printDetails();
 
   irrecv.blink13(false); // Flash pin 13 when IR is recived
   irrecv.enableIRIn(); // Start the receiver
@@ -127,22 +128,5 @@ void setup() {
   
   delay(1000);
 
-  #if defined(DISPLAYTYPE_TWO_CHAR)
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    sprintf(Buffdata,"Player %u", gameData_playerID);
-    lcd.print(Buffdata);
-    lcd.setCursor(0, 1);
-    lcd.print("Connecting..");
-  #else
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(3, 0);
-    display.print("Player ID: "); display.println(gameData_playerID);
-    display.setCursor(6, 25);
-    display.setTextSize(1);
-    display.println("Waiting for host..");
-    display.display();
-  #endif
+  screens(1); /* Display connection screen */
 }
